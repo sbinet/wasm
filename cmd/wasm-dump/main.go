@@ -2,21 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package wasm_test
+package main
 
 import (
+	"flag"
 	"fmt"
-	"testing"
+	"log"
 
 	"github.com/sbinet/wasm"
 )
 
-func TestOpen(t *testing.T) {
-	mod, err := wasm.Open("testdata/hello.wasm")
+func main() {
+	log.SetFlags(0)
+	log.SetPrefix("wasm>> ")
+
+	flag.Parse()
+
+	fname := flag.Arg(0)
+	mod, err := wasm.Open(fname)
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 
 	fmt.Printf("module header: %v\n", mod.Header)
 	fmt.Printf("#sections: %d\n", len(mod.Sections))
+	for _, section := range mod.Sections {
+		fmt.Printf("section: %2d (%T)\n", section.ID(), section)
+	}
 }

@@ -62,16 +62,24 @@ func uvarint(r io.Reader) (uint32, int, error) {
 	panic("unreachable")
 }
 
-type ValueType varint7
+func varint(r io.Reader) (int32, int, error) {
+	uv, n, err := uvarint(r)
+	v := int32(uv >> 1)
+	if uv&1 != 0 {
+		v = ^v
+	}
+	return v, n, err
+}
+
+type ValueType int32
 
 type BlockType varint7
 type ElemType varint7
+
 type FuncType struct {
-	Form        varint7   // value for the 'func' type constructor
-	ParamCount  varuint32 // number of parameters to the function
-	ParamTypes  []ValueType
-	ReturnCount varuint1 // number of results from the function
-	ReturnType  []ValueType
+	form    uint32      // value for the 'func' type constructor
+	params  []ValueType // parameters of the function
+	results []ValueType // results of the function
 }
 
 // GlobalType describes a global variable
@@ -82,8 +90,8 @@ type GlobalType struct {
 
 // TableType describes a table
 type TableType struct {
-	ElementType ElemType // the type of elements
-	Limits      ResizableLimits
+	ElemType ElemType // the type of elements
+	Limits   ResizableLimits
 }
 
 // MemoryType describes a memory
@@ -111,9 +119,9 @@ const (
 
 // ResizableLimits describes the limits of a table or memory
 type ResizableLimits struct {
-	Flags   varuint32 // bit 0x1 is set if the maximum field is present
-	Initial varuint32 // initial length (in units of table elements or wasm pages)
-	Maximum varuint32 // only present if specified by Flags
+	Flags   uint32 // bit 0x1 is set if the maximum field is present
+	Initial uint32 // initial length (in units of table elements or wasm pages)
+	Maximum uint32 // only present if specified by Flags
 }
 
 // InitExpr encodes an initializer expression.
