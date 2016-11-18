@@ -209,7 +209,9 @@ func (d *decoder) readSection() Section {
 	}
 
 	if r.N != 0 {
-		log.Fatalf("wasm: N=%d bytes unread!\n", r.N)
+		log.Printf("wasm: N=%d bytes unread! (section=%d)\n", r.N, sec.ID())
+		buf := make([]byte, r.N)
+		d.read(r, buf)
 	}
 
 	return sec
